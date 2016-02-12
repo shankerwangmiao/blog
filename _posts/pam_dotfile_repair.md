@@ -1,50 +1,58 @@
-##`pam_dotfile` 修理手记
+layout: post
+title: pam_dotfile 修理手记
+date: Wed Feb 10 20:50:00 2016 +0000
+tags:
+- 技术
+- PAM
+---
 
-###源起
+## `pam_dotfile` 修理手记
+
+### 源起
 
 修理这个 `pam_dotfile` 的起因是[@dotkrnl](http://www.dotkrnl.com) 。他认为用 yubikey 作为登录的鉴定的充分凭据是不当的。因为 yubikey 是由所有者持有的（What you have.），存在失窃的风险，需要和所有者知道的（What you know.）搭配来使用，才科学。但是二者搭配起来作鉴定，即同时鉴定 yubikey 和系统登录密码又显得很麻烦，没有体现出 yubikey 的方便之处。于是一个这样的设想被提出来，才引发了下面一连串的血案。
 
 	bigeag1e 11:57:32    YubiKey 4 简介与配置 | K.I.S.S
-	                     https://bigeagle.me/2016/02/yubikey-4/ 
-	dotkrnl  12:02:10	   auth sufficient 
+	                     https://bigeagle.me/2016/02/yubikey-4/
+	dotkrnl  12:02:10	   auth sufficient
 	dotkrnl  12:02:41	   看起来就很不安全  
-	shankerwangmiao  12:25:54	 怎么不安全了？ 
-	dotkrnl  12:26:32 YubiKey 一插进去就可以登录用户，丢失权限就直接被获得了啊 
-	dotkrnl  12:26:41	 没有第二步密码 
-	shankerwangmiao	12:27:11	 密码还是少用为妙 
-	shankerwangmiao	12:28:00	 你yubikey还能和电脑一起丢了啊？ 
-	bigeag1e 12:28:25 你可以改成 auth required 啊 
-	dotkrnl  12:28:44	 我觉得 required 比较靠谱呢 
-	bigeag1e 12:29:03 还是TOTP，U2F和TOTP有其一即可 
-	dotkrnl  12:29:09	 存在这种可能啊，所以我觉得比密码危险 
-	shankerwangmiao	12:29:19	 再说了，电脑丢了，有多少密码也挡不住啊 
-	dotkrnl  12:29:46	 全盘加密 🐶 
+	shankerwangmiao  12:25:54	 怎么不安全了？
+	dotkrnl  12:26:32 YubiKey 一插进去就可以登录用户，丢失权限就直接被获得了啊
+	dotkrnl  12:26:41	 没有第二步密码
+	shankerwangmiao	12:27:11	 密码还是少用为妙
+	shankerwangmiao	12:28:00	 你yubikey还能和电脑一起丢了啊？
+	bigeag1e 12:28:25 你可以改成 auth required 啊
+	dotkrnl  12:28:44	 我觉得 required 比较靠谱呢
+	bigeag1e 12:29:03 还是TOTP，U2F和TOTP有其一即可
+	dotkrnl  12:29:09	 存在这种可能啊，所以我觉得比密码危险
+	shankerwangmiao	12:29:19	 再说了，电脑丢了，有多少密码也挡不住啊
+	dotkrnl  12:29:46	 全盘加密 🐶
 	dotkrnl  12:29:48	 
-	shankerwangmiao	12:30:01	 那要yubikey 
-	dotkrnl  12:30:19	 解锁啊 
-	dotkrnl  12:30:30	 你也不会关机的吧 🐶 
-	shankerwangmiao	12:31:35	 何用？ 
-	shankerwangmiao	12:31:41	 额 
-	shankerwangmiao	12:31:58	 反正我解锁电脑是sufficient 
-	shankerwangmiao	12:32:35	 login是required 
-	dotkrnl  12:32:39	 我的期望是能 1、输完整密码 2、插 key 同时输一个弱密码。二选一。但是不知道怎么做。 
-	shankerwangmiao	12:33:12	 你需要配置一个pam 
-	shankerwangmiao	12:34:09	 这个pam仅仅验证输入的密码是不是123456 
-	shankerwangmiao	12:34:09	 然后在pam里配置三个规则 
-	shankerwangmiao	12:36:29	 第一条yubikey的，成功继续往下走，失败则跳过下面的一条 
-	shankerwangmiao	12:36:29	 第二条是弱口令的，是sufficient 
-	shankerwangmiao	12:36:29	 第三条是系统原来的 
-	dotkrnl  12:42:12	 这个怎么做 
-	shankerwangmiao	12:44:08	 就是在原来sufficient的位置处填一个表达式 
+	shankerwangmiao	12:30:01	 那要yubikey
+	dotkrnl  12:30:19	 解锁啊
+	dotkrnl  12:30:30	 你也不会关机的吧 🐶
+	shankerwangmiao	12:31:35	 何用？
+	shankerwangmiao	12:31:41	 额
+	shankerwangmiao	12:31:58	 反正我解锁电脑是sufficient
+	shankerwangmiao	12:32:35	 login是required
+	dotkrnl  12:32:39	 我的期望是能 1、输完整密码 2、插 key 同时输一个弱密码。二选一。但是不知道怎么做。
+	shankerwangmiao	12:33:12	 你需要配置一个pam
+	shankerwangmiao	12:34:09	 这个pam仅仅验证输入的密码是不是123456
+	shankerwangmiao	12:34:09	 然后在pam里配置三个规则
+	shankerwangmiao	12:36:29	 第一条yubikey的，成功继续往下走，失败则跳过下面的一条
+	shankerwangmiao	12:36:29	 第二条是弱口令的，是sufficient
+	shankerwangmiao	12:36:29	 第三条是系统原来的
+	dotkrnl  12:42:12	 这个怎么做
+	shankerwangmiao	12:44:08	 就是在原来sufficient的位置处填一个表达式
 	shankerwangmiao	12:44:20	 这个表达式在pam.conf的man里有讲解
-	
+
 当时提出这个配置 pam 的方法，是因为刚刚看过 linux pam 的 man 页面，才知道 linux pam 的 conf 还可以这样写：
 
 	For the more complicated syntax valid control values have the following
 	form:
-	
+
 	          [value1=action1 value2=action2 ...]
-	
+
 	Where valueN corresponds to the return code from the function invoked
 	in the module for which the line is defined. It is selected from one of
 	these: success, open_err, symbol_err, service_err, system_err, buf_err,
@@ -54,26 +62,26 @@
 	authtok_err, authtok_recover_err, authtok_lock_busy,
 	authtok_disable_aging, try_again, ignore, abort, authtok_expired,
 	module_unknown, bad_item, conv_again, incomplete, and default.
-	
+
 	The last of these, default, implies 'all valueN's not mentioned
 	explicitly. Note, the full list of PAM errors is available in
 	/usr/include/security/_pam_types.h. The actionN can take one of the
 	following forms:
-	
+
 	ignore
 	    when used with a stack of modules, the module's return status will
 	    not contribute to the return code the application obtains.
-	
+
 	bad
 	    this action indicates that the return code should be thought of as
 	    indicative of the module failing. If this module is the first in
 	    the stack to fail, its status value will be used for that of the
 	    whole stack.
-	
+
 	die
 	    equivalent to bad with the side effect of terminating the module
 	    stack and PAM immediately returning to the application.
-	
+
 	ok
 	    this tells PAM that the administrator thinks this return code
 	    should contribute directly to the return code of the full stack of
@@ -82,32 +90,32 @@
 	    override this value. Note, if the former state of the stack holds
 	    some value that is indicative of a modules failure, this 'ok' value
 	    will not be used to override that value.
-	
+
 	done
 	    equivalent to ok with the side effect of terminating the module
 	    stack and PAM immediately returning to the application.
-	
+
 	N (an unsigned integer)
 	    equivalent to ok with the side effect of jumping over the next N
 	    modules in the stack. Note that N equal to 0 is not allowed (and it
 	    would be identical to ok in such case).
-	
+
 	reset
 	    clear all memory of the state of the module stack and start again
 	    with the next stacked module.
-	
+
 	Each of the four keywords: required; requisite; sufficient; and
 	optional, have an equivalent expression in terms of the [...] syntax.
 	They are as follows:
 	required
 	    [success=ok new_authtok_reqd=ok ignore=ignore default=bad]
-	
+
 	requisite
 	    [success=ok new_authtok_reqd=ok ignore=ignore default=die]
-	
+
 	sufficient
 	    [success=done new_authtok_reqd=done default=ignore]
-	
+
 	optional
 	    [success=ok new_authtok_reqd=ok default=ignore]
 
@@ -118,7 +126,7 @@
 	      fail    +-------------+
 	  /-----------| pam_yubikey |
 	  |           +-------------+
-	  |                   | 
+	  |                   |
 	  |                   | success
 	  |                  \|/
 	  |           +-------------+   success   +----------+
@@ -136,7 +144,7 @@
 	              +-------------+
 	              | 鉴定失败     |
 	              +-------------+
-	              
+
 不难想到，这个鉴定流程很容易用 linux pam 的“跳过鉴定模块”的功能来实现。其中“`pam_强口令`”可以用系统原先的 pam 模块，唯一缺的就是 “`pam_弱口令`”。不过这个自己写也不会很难，照着别的 pam 模块的代码改一改应该就能成。
 
 这就是我在上面的聊天里作出回复的思维过程，当时因为在外边走路，感觉这样可以实现，于是就这么回答了 [@dotkrnl](http://www.dotkrnl.com)。
@@ -199,7 +207,7 @@
 
 可知，`misc_conv` 应该是个函数，错误应该是由于少包含了头文件导致的。于是立刻查找这个函数的头文件，Google 告诉我，这个函数在 `security/pam_misc.h`。立刻检测并包含之。且慢！我的系统上并没有这个头文件啊？这下坑爹了。于是用 misc_conv+ OSX 在 Google 上搜索，并没有啥结论。于是返回看 linux 下关于这个函数的 manual，其中提到：
 
-> The `misc_conv` function is part of `libpam_misc` and not of the standard `libpam` library. 
+> The `misc_conv` function is part of `libpam_misc` and not of the standard `libpam` library.
 
 于是转而查找 `pam_misc` 这个 library 在 OSX 上的替用品，结果也没找到什么结论。于是继续看这个函数干什么用的。
 
@@ -216,7 +224,7 @@
 		struct passwd	*pwd;
 		struct pam_conv	conv = { openpam_ttyconv, NULL };
 		enum tristate	iscsh;
-		
+
 哈哈，原来是`openpam_ttyconv`，搜索之，得到 `security/openpam.h`。
 
 然后就是如何在两个函数中选择了，这里我参考了[这里](https://github.com/TinLe/macports/blob/082d31e48a3498fde4cfe0c479983128a479a791/net/quagga/files/quagga-patch2.diff) 的代码：
@@ -234,7 +242,7 @@
 大概的实现方式就是在 `configure` 的时候探测 `pam/pam_misc.h` 和 `security/openpam.h`，并定义宏 `PAM_CONV_FUNC` 为相应的函数名，然后在代码中直接使用：
 
 	static struct pam_conv pc = { PAM_CONV_FUNC, NULL };
-	
+
 OK，最后修复了这个位置，然后编译就通过了。
 
 ### 尾声
@@ -242,33 +250,33 @@ OK，最后修复了这个位置，然后编译就通过了。
 编译通过了就要简单的测试一下代码还能否 work。于是先执行
 
 	$ pam-dotfile-gen -a test
-	
+
 然后输入一个简单的密码 `12345`，于是就生成了 `~/.pam-test`，然后写一个 `/etc/pam.d/test`
 
-	auth       required       /usr/local/lib/security/pam_dotfile.so try_first_pass 
-	
+	auth       required       /usr/local/lib/security/pam_dotfile.so try_first_pass
+
 最后执行：
 
 	$ pamtest test $USER
-	
+
 先输入一个错误的密码，再输入一个正确的密码，于是可以看出，这个模块在这个给定的输入下是可以工作的。鉴于这份代码已经是成型的代码，我并没有改动什么逻辑的部分，于是可以推定这份代码应该是没什么问题了。
 
 于是本来我们是想先解决 `pam.conf` 的问题，结果不小心解决了 `pam_弱口令` 的问题。此时我们有了 `pamtest` 于是就可以顺利地测试我们期望的那个配置文件了：
 
 	auth       [success=ok ignore=ignore default=1]       pam_yubico.so mode=challenge-response
-	auth       sufficient     /usr/local/lib/security/pam_dotfile.so try_first_pass 
+	auth       sufficient     /usr/local/lib/security/pam_dotfile.so try_first_pass
 	auth       required       pam_opendirectory.so try_first_pass  # 这个是 OS X 上原有的 pam 模块，用于标准的鉴定过程。
-	
+
 结果：
 
 	$ pamtest test $USER
 	Trying to authenticate <shanker> for service <test>.
 	Failure starting pam: system error
-	
+
 在 syslog 中赫然写着：
 
 	pamtest[72280]: in openpam_read_chain(): /etc/pam.d/test(2): invalid control flag '[default=1]'
-	
+
 唔，原来 OS X 上的 `OpenPAM` 不支持这种语法。
 
 卒。。。。。（未完待续）

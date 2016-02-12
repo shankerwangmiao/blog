@@ -1,4 +1,12 @@
-##个人收藏短片之一：《红领巾》
+layout: post
+title: 个人收藏短片之一：《红领巾》
+date: Wed Sep 3 12:00:00 2014 +0000
+tags:
+- 收藏
+- 短片
+---
+
+## 个人收藏短片之一：《红领巾》
 
 [这个](https://www.youtube.com/watch?v=n2_ePWt6xAI)是该短片的链接，欢迎收看。
 
