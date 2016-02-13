@@ -12,6 +12,8 @@ tags:
 
 修理这个 `pam_dotfile` 的起因是[@dotkrnl](http://www.dotkrnl.com) 。他认为用 yubikey 作为登录的鉴定的充分凭据是不当的。因为 yubikey 是由所有者持有的（What you have.），存在失窃的风险，需要和所有者知道的（What you know.）搭配来使用，才科学。但是二者搭配起来作鉴定，即同时鉴定 yubikey 和系统登录密码又显得很麻烦，没有体现出 yubikey 的方便之处。于是一个这样的设想被提出来，才引发了下面一连串的血案。
 
+<!--more-->
+
 	bigeag1e 11:57:32    YubiKey 4 简介与配置 | K.I.S.S
 	                     https://bigeagle.me/2016/02/yubikey-4/
 	dotkrnl  12:02:10	   auth sufficient

@@ -9,6 +9,8 @@ tags:
 
 说到想写博客，还是一个月前的事情。那时候刚期末考试完，感觉时间都被不知道的事情占据着。正翻着网上的新闻，突然想到自己可以搞一个私人博客，写些东西给自己看。
 
+<!--more-->
+
 真正开始着手搭博客，是在几天之前。想到我和[@cqtest](https://www.innull.com/~cqtest/)合租的VPS一直没有完全地被利用，决定就先把博客搭在这个VPS上。选了一个域名：innull.com，搞到ssl的证书，开始安装LAMP。
 
 说到LAMP的安装，还是得感谢[@cqtest](https://www.innull.com/~cqtest/)，之前自己编译的“AMP”不知怎么回事。工作十分不稳定。我对Linux还不太熟悉，软件包提供的Apache、Mysql、PHP我还不太会用，找不到这些东西的配置文件，幸好[@cqtest](https://www.innull.com/~cqtest/)帮我搞定了。
