@@ -92,7 +92,7 @@ session    required       pam_launchd.so
 10. 按下表格处理
 
 	 | 控制标记 | `PAM_SUCCESS` | 其它 |
-	 | ---|-------|------- |
+	 | --- | ------- | ------- |
 	 | `optional` | `success` ++ | 不处理 |
 	 | `required` | `success` ++ | 若 `fail` 为 `false`，则 `fail` 置为 `true`，且将 `ret` 置为 `r`；否则不处理 |
 	 | `requisite` | 同上 | 同 `requisite`；并立刻终止遍历，转 12 |
@@ -215,7 +215,7 @@ Linux-PAM 在控制标记字段支持一种高级的语法，即跟据 Module �
 9. 按下表格处理
 
 	  |`action` | 处理方法 |
-	  |---------|-------|
+	  | -------- | ------- |
 	  |`reset` | 恢复 `status` 为 `PAM_PERM_DENIED`；恢复 `impression` 为 `_PAM_UNDEF` |
 	  |`ok` |  当 `r` 为 `PAM_IGNORE` 时，不处理；否则，当 `impression` 为 `_PAM_UNDEF` 时，更新 `impression` 为 `_PAM_POSITIVE`，并将 `status` 更新为 `r`；当 `impression` 已经是 `_PAM_POSITIVE` 且 `status` 是 `PAM_SUCCESS` 时，将 `status` 更新为 `r`|
 	  |`done` | 同 `ok`，若 `impression` 为 `_PAM_POSITIVE`，则终止处理，转 11 |
