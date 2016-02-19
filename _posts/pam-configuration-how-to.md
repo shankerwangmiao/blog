@@ -1,6 +1,6 @@
 layout: post
 title: PAM 配置简介
-date: Wed Aug 13 10:00:00 2014 +0000
+date: Fri Feb 19 22:00:00 2016 +0800
 tags:
 - pam
 - 技术
