@@ -216,7 +216,7 @@ Linux-PAM 在控制标记字段支持一种高级的语法，即跟据 Module �
 
 	  |`action` | 处理方法 |
 	  |---------|-------|
-	  |`reset` | 恢复 `status` 为 `PAM_PERM_DENIED`；恢复 `impression` 为 _PAM_UNDEF |
+	  |`reset` | 恢复 `status` 为 `PAM_PERM_DENIED`；恢复 `impression` 为 `_PAM_UNDEF` |
 	  |`ok` |  当 `r` 为 `PAM_IGNORE` 时，不处理；否则，当 `impression` 为 `_PAM_UNDEF` 时，更新 `impression` 为 `_PAM_POSITIVE`，并将 `status` 更新为 `r`；当 `impression` 已经是 `_PAM_POSITIVE` 且 `status` 是 `PAM_SUCCESS` 时，将 `status` 更新为 `r`|
 	  |`done` | 同 `ok`，若 `impression` 为 `_PAM_POSITIVE`，则终止处理，转 11 |
 	  |`bad` | 若 impression 已经是 `_PAM_NEGATIVE`，则不作处理；否则将 impression 置为 `_PAM_NEGATIVE`，若 `r` 是 `PAM_IGNORE` 则将 `status` 置为 `PAM_PERM_DENIED`，否则将 `status` 置为 `r` |
