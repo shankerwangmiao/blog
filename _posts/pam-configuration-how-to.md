@@ -2,7 +2,7 @@ layout: post
 title: PAM 配置简介
 date: Fri Feb 19 22:00:00 2016 +0800
 tags:
-- pam
+- PAM
 - 技术
 ---
 
@@ -91,13 +91,13 @@ session    required       pam_launchd.so
 9.	若 `r` 为 `PAM_IGNORE` 则表示该模块希望 PAM 忽略这一结果，于是转 6， 继续处理下一个配置项；若都处理完毕，则转 12
 10. 按下表格处理
 
-	 | 控制标记 | `PAM_SUCCESS` | 其它 |
-	 | --- | ------- | ------- |
-	 | `optional` | `success` ++ | 不处理 |
-	 | `required` | `success` ++ | 若 `fail` 为 `false`，则 `fail` 置为 `true`，且将 `ret` 置为 `r`；否则不处理 |
-	 | `requisite` | 同上 | 同 `requisite`；并立刻终止遍历，转 12 |
-	 | `sufficient` | `success` ++；若 `fail` 为 `false`，则终止遍历，转 12 | 不作处理 |
-	 | `binding` | 同 `sufficient` | 同 `required` |
+	|控制标记 | `PAM_SUCCESS` | 其它 |
+	|--- | ------- | ------- |
+	|`optional` | `success` ++ | 不处理 |
+	|`required` | `success` ++ | 若 `fail` 为 `false`，则 `fail` 置为 `true`，且将 `ret` 置为 `r`；否则不处理 |
+	|`requisite` | 同上 | 同 `requisite`；并立刻终止遍历，转 12 |
+	|`sufficient` | `success` ++；若 `fail` 为 `false`，则终止遍历，转 12 | 不作处理 |
+	|`binding` | 同 `sufficient` | 同 `required` |
 	  
 11.	转 6，继续处理下一条配置项
 12. 若 `success` 为 `0` 但 `ret` 为 `PAM_SUCCESS`，则将 `ret` 置为 `PAM_SYSTEM_ERR`
@@ -213,16 +213,16 @@ Linux-PAM 在控制标记字段支持一种高级的语法，即跟据 Module �
 7.	获得该模块的返回值`r`
 8.	根据返回值 `r` 选取采取的动作 `action`
 9. 按下表格处理
-
-	  |`action` | 处理方法 |
-	  | -------- | ------- |
-	  |`reset` | 恢复 `status` 为 `PAM_PERM_DENIED`；恢复 `impression` 为 `_PAM_UNDEF` |
-	  |`ok` |  当 `r` 为 `PAM_IGNORE` 时，不处理；否则，当 `impression` 为 `_PAM_UNDEF` 时，更新 `impression` 为 `_PAM_POSITIVE`，并将 `status` 更新为 `r`；当 `impression` 已经是 `_PAM_POSITIVE` 且 `status` 是 `PAM_SUCCESS` 时，将 `status` 更新为 `r`|
-	  |`done` | 同 `ok`，若 `impression` 为 `_PAM_POSITIVE`，则终止处理，转 11 |
-	  |`bad` | 若 impression 已经是 `_PAM_NEGATIVE`，则不作处理；否则将 impression 置为 `_PAM_NEGATIVE`，若 `r` 是 `PAM_IGNORE` 则将 `status` 置为 `PAM_PERM_DENIED`，否则将 `status` 置为 `r` |
-	  |`die` | 同 `bad`，但立刻终止处理，转 11 |
-	  |`ignore` | 不处理|
-	  |N （无符号整数）| 跳过 N 个配置项|
+		
+	|`action` | 处理方法 |
+	| -------- | ------- |
+	|`reset` | 恢复 `status` 为 `PAM_PERM_DENIED`；恢复 `impression` 为 `_PAM_UNDEF` |
+	|`ok` |  当 `r` 为 `PAM_IGNORE` 时，不处理；否则，当 `impression` 为 `_PAM_UNDEF` 时，更新 `impression` 为 `_PAM_POSITIVE`，并将 `status` 更新为 `r`；当 `impression` 已经是 `_PAM_POSITIVE` 且 `status` 是 `PAM_SUCCESS` 时，将 `status` 更新为 `r`|
+	|`done` | 同 `ok`，若 `impression` 为 `_PAM_POSITIVE`，则终止处理，转 11 |
+	|`bad` | 若 impression 已经是 `_PAM_NEGATIVE`，则不作处理；否则将 impression 置为 `_PAM_NEGATIVE`，若 `r` 是 `PAM_IGNORE` 则将 `status` 置为 `PAM_PERM_DENIED`，否则将 `status` 置为 `r` |
+	|`die` | 同 `bad`，但立刻终止处理，转 11 |
+	|`ignore` | 不处理|
+	|N （无符号整数）| 跳过 N 个配置项|
 	  
 10.	转 5，继续处理下一条配置项
 11. 若 `status` 是 `PAM_SUCCESS` 但 `impression` 不是 `_PAM_POSITIVE`，则将 `status` 覆盖为 `PAM_PERM_DENIED`
@@ -234,14 +234,14 @@ Linux-PAM 在控制标记字段支持一种高级的语法，即跟据 Module �
 *	Linux PAM 引入 `impression` 来评估当前的局面。`impression` 仅被 `action` 控制，与具体的 Module 返回值没有关系。
 *	除了 `reset` 以外，`impression` 只能由“未知”转向“正面”（`ok` 和 `done`），或是由任意状态转向“负面”（`bad` 和 `die`）。一旦进入了“负面”，则出了被 `reset` 以为，不会进入别的状态。
 *	`status` 取决于 Module 的返回值，同时受采取的 `action` 和当前的 `impression` 影响。
-*	无论 `action` 是什么，某个 Module 的返回值只会有两种处理方式：用于覆盖当前的 `status` 或者被忽略。注意：Module 的返回值是**不会**被修改的。
-	
+	无论 `action` 是什么，某个 Module 的返回值只会有两种处理方式：用于覆盖当前的 `status` 或者被忽略。注意：Module 的返回值是**不会**被修改的。
+		
 	例如：
-	
+		
 	```
 	auth [success=bad ignore=ignore default=done] pam_xxx.so
 	```
-	
+		
 	这条配置的后果是，当 `pam_xxx.so` 失败的时候，虽然动作是 `ok`，但是 `status` 会被更新为一个非 `PAM_SUCCESS` 的值，最终导致鉴定失败。当 `pam_xxx.so` 成功的时候，虽然 `status` 被更新为了 `PAM_SUCCESS`，但是由于采取的动作是 `bad`，`impression` 会转为“负面”，最终在出口处（步骤 11）PAM 把 `status` 覆盖为 `PAM_PERM_DENIED`。
 	
 *	一旦 `impression` 转为“负面”（`bad` 或 `die`），则 `status` 会被更新，且被“锁定”，之后的 Module 的所有返回值都会被忽略。
