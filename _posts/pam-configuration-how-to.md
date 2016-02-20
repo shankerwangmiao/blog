@@ -229,7 +229,7 @@ optional
   |`die` | 同 `bad`，但立刻终止处理，转 11 |
   |`ignore` | 不处理|
   |N （无符号整数）| 跳过 N 个配置项|
-  
+
 10.  转 5，继续处理下一条配置项
 11.  若 `status` 是 `PAM_SUCCESS` 但 `impression` 不是 `_PAM_POSITIVE`，则将 `status` 覆盖为 `PAM_PERM_DENIED`
 12.  返回 `status`
@@ -238,7 +238,7 @@ optional
 
 *  Linux PAM 引入了 `action` 来指示处理方式，这样代码就清晰了不少，同时增强了灵活性。
 *  Linux PAM 引入 `impression` 来评估当前的局面。`impression` 仅被 `action` 控制，与具体的 Module 返回值没有关系。
-*  除了 `reset` 以外，`impression` 只能由“未知”转向“正面”（`ok` 和 `done`），或是由任意状态转向“负面”（`bad` 和 `die`）。一旦进入了“负面”，则出了被 `reset` 以为，不会进入别的状态。
+*  除了 `reset` 以外，`impression` 只能由“未知”转向“正面”（`ok` 和 `done`），或是由任意状态转向“负面”（`bad` 和 `die`）。一旦进入了“负面”，则除了被 `reset` 以外，不会进入别的状态。
 *  `status` 取决于 Module 的返回值，同时受采取的 `action` 和当前的 `impression` 影响。
   无论 `action` 是什么，某个 Module 的返回值只会有两种处理方式：用于覆盖当前的 `status` 或者被忽略。注意：Module 的返回值是**不会**被修改的。
 
