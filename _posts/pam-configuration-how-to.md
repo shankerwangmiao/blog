@@ -91,15 +91,13 @@ function-class include other-service-name
 7.  PAM Module 做一些事情，给出返回值
 8.  获得该模块的返回值`r`
 9.  若 `r` 为 `PAM_IGNORE` 则表示该模块希望 PAM 忽略这一结果，于是转 6， 继续处理下一个配置项；若都处理完毕，则转 12
-10. 按下表格处理
+10. 当控制标记为：
 
-    控制标记 | `PAM_SUCCESS` | 其它
-    ----- | ------- | -------
-    `optional` | `success` ++ | 不处理
-    `required` | `success` ++ | 若 `fail` 为 `false`，则 `fail` 置为 `true`，且将 `ret` 置为 `r`；否则不处理
-    `requisite` | 同上 | 同 `requisite`；并立刻终止遍历，转 12
-    `sufficient` | `success` ++；若 `fail` 为 `false`，则终止遍历，转 12 | 不作处理
-    `binding` | 同 `sufficient` | 同 `required`
+    - `optional` 时，若 `r` 为 `PAM_SUCCESS`，则 `success` ++ ；否则不处理
+    - `required` 时，若 `r` 为 `PAM_SUCCESS`，则 `success` ++ 。当 `r` 为其他值时，若 `fail` 为 `false`，则 `fail` 置为 `true`，且将 `ret` 置为 `r`；否则不处理
+    - `requisite` 时，若 `r` 为 `PAM_SUCCESS` 则同 `required`；否则同 `requisite`；并立刻终止遍历，转 12
+    - `sufficient` 时，若 `r` 为 `PAM_SUCCESS` 则 `success` ++，同时，若 `fail` 为 `false`，则终止遍历，转 12。若 `r` 为其他值，则不作处理。
+    - `binding` 时，若 `r` 为 `PAM_SUCCESS` 则同 `sufficient`，反之同 `required`
 
 11. 转 6，继续处理下一条配置项
 12. 若 `success` 为 `0` 但 `ret` 为 `PAM_SUCCESS`，则将 `ret` 置为 `PAM_SYSTEM_ERR`
@@ -131,10 +129,10 @@ function-class include other-service-name
 
 一般的来讲，Module 的参数是由模块全权处理的，但是不同的 Module 接受的参数还是有一定共性的约定的。下面是一些常见的参数。注意，不一定所有的  Module 都接受这些参数，这些参数的意义也有可能因 Module 的不同而有所变化，请以 Module 的文档为准。
 
-*  `debug` 输出调试信息
-*  `use_first_pass` 意味着 Module 不提示用户输入密码，而是用上一个模块输入的密码；如果之前没有模块输入密码，则使用 Application 在调用 PAM 鉴定功能前设定的密码。如果 Application 没有设定密码，则 Module 会获知这一情况，进行相应的处理。
-*  `try_first_pass` 跟 `use_first_pass` 类似，但是当上一个模块输入的密码或 Application 提供的密码不正确或不存在时，提示用户输入密码，重新鉴定。
-*  `nullok` 允许空密码
+*  `debug`：输出调试信息
+*  `use_first_pass`：意味着 Module 不提示用户输入密码，而是用上一个模块输入的密码；如果之前没有模块输入密码，则使用 Application 在调用 PAM 鉴定功能前设定的密码。如果 Application 没有设定密码，则 Module 会获知这一情况，进行相应的处理。
+*  `try_first_pass`：跟 `use_first_pass` 类似，但是当上一个模块输入的密码或 Application 提供的密码不正确或不存在时，提示用户输入密码，重新鉴定。
+*  `nullok`：允许空密码，或者当不存在相应的鉴定信息文件的时候通过鉴定（前者例如 `pam_unix.so`；后者例如 `pam_google_authenticator.so`，当保存有被鉴定的用户的 OTP 信息的秘密文件不存在时，通过鉴定）。
 
 ### Linux-PAM 高级语法
 
@@ -218,17 +216,15 @@ optional
 6.  PAM Module 做一些事情，给出返回值
 7.  获得该模块的返回值`r`
 8.  根据返回值 `r` 选取采取的动作 `action`
-9.  按下表格处理
+9.  当 `action` 为：
 
-  |`action` | 处理方法 |
-  | -------- | ------- |
-  |`reset` | 恢复 `status` 为 `PAM_PERM_DENIED`；恢复 `impression` 为 `_PAM_UNDEF` |
-  |`ok` |  当 `r` 为 `PAM_IGNORE` 时，不处理；否则，当 `impression` 为 `_PAM_UNDEF` 时，更新 `impression` 为 `_PAM_POSITIVE`，并将 `status` 更新为 `r`；当 `impression` 已经是 `_PAM_POSITIVE` 且 `status` 是 `PAM_SUCCESS` 时，将 `status` 更新为 `r`|
-  |`done` | 同 `ok`，若 `impression` 为 `_PAM_POSITIVE`，则终止处理，转 11 |
-  |`bad` | 若 impression 已经是 `_PAM_NEGATIVE`，则不作处理；否则将 impression 置为 `_PAM_NEGATIVE`，若 `r` 是 `PAM_IGNORE` 则将 `status` 置为 `PAM_PERM_DENIED`，否则将 `status` 置为 `r` |
-  |`die` | 同 `bad`，但立刻终止处理，转 11 |
-  |`ignore` | 不处理|
-  |N （无符号整数）| 跳过 N 个配置项|
+  - `reset` 时，恢复 `status` 为 `PAM_PERM_DENIED`；并恢复 `impression` 为 `_PAM_UNDEF` 
+  - `ok` 时，当 `r` 为 `PAM_IGNORE` 时，不处理；否则，当 `impression` 为 `_PAM_UNDEF` 时，更新 `impression` 为 `_PAM_POSITIVE`，并将 `status` 更新为 `r`；当 `impression` 已经是 `_PAM_POSITIVE` 且 `status` 是 `PAM_SUCCESS` 时，将 `status` 更新为 `r`
+  - `done` 时，同 `ok`，若 `impression` 为 `_PAM_POSITIVE`，则终止处理，转 11 
+  - `bad` 时，若 impression 已经是 `_PAM_NEGATIVE`，则不作处理；否则将 impression 置为 `_PAM_NEGATIVE`，若 `r` 是 `PAM_IGNORE` 则将 `status` 置为 `PAM_PERM_DENIED`，否则将 `status` 置为 `r` 
+  - `die` 时，同 `bad`，但立刻终止处理，转 11 
+  - `ignore` 时，不处理
+  - N（无符号整数）时，跳过 N 个配置项
 
 10.  转 5，继续处理下一条配置项
 11.  若 `status` 是 `PAM_SUCCESS` 但 `impression` 不是 `_PAM_POSITIVE`，则将 `status` 覆盖为 `PAM_PERM_DENIED`
