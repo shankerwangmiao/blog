@@ -78,6 +78,7 @@ exec /sbin/init "$@" </dev/console >/dev/console 2>&1
 echo failed...
 sleep 10000
 HERE
+
 ``` 
 
 别忘了 `chmod +x /usr/local/sbin/init.sh`。
@@ -92,6 +93,7 @@ GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT init=/usr/local/sbin/ini
 
 ```
 update-grub
+
 ```
 
 就可以了。
