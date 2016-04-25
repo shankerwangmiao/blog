@@ -42,7 +42,7 @@ if [ \( x$yes = xy \) -o \( x$yes = xY \) ]; then
   sleep 10000
 fi
 
-echo Reading rootfs, it may takes several minutes...
+echo Reading rootfs, it may take several minutes...
 mkdir -p /run/rootfs
 mount -t tmpfs  -o size=4G shankers-mem-ubuntu /run/rootfs 
 rsync -a / /run/rootfs/ --exclude=/proc --exclude=/dev --exclude=/sys --exclude=/run --exclude=/var/cache --exclude=/var/log --exclude=/usr/include --exclude=/usr/local/include 
