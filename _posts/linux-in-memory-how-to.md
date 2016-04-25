@@ -11,6 +11,8 @@ tags:
 
 最近总是会有一些需求，就是快速地部署一个临时的网关。有的时候，用于部署网关的电脑可能只是临时拿来用的。因此，给人家重新装个系统就很不靠谱了。我通常的做法是，在我的 U 盘里装个 ubuntu 之类的。然后里边装上 bind、isc-dhcp-server 之类的，然后每次用这个 U 盘启动就好了。后来发现，这个问题并不是那么简单，因为 U 盘插在别人的电脑上，一来容易丢失，二来容易被物理碰撞损坏。于是我就考虑，能不能在启动后，把根文件系统载入到内存中，这样就可以拔掉 U 盘了。
 
+<!--more-->
+
 ## 一种方案
 
 有一种方案是显然可行的，就是把整个系统搞成一个 initrd，这样自然就在内存中了。这样作的弊端是，initrd 是 bootloader 载入到内存中的。而 Grub 读取硬盘的驱动是走的 BIOS，这样速度就很慢了。同时，尽可能少的改动发行版，也有利于后续继续安装软件和维护。
@@ -78,9 +80,7 @@ exec /sbin/init "$@" </dev/console >/dev/console 2>&1
 echo failed...
 sleep 10000
 HERE
-
-``` 
-
+```
 别忘了 `chmod +x /usr/local/sbin/init.sh`。
 
 之后新建一个 `/etc/default/grub.d/memroot.cfg`，里边写上：
@@ -93,7 +93,6 @@ GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT init=/usr/local/sbin/ini
 
 ```
 update-grub
-
 ```
 
 就可以了。
