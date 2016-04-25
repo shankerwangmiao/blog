@@ -70,7 +70,7 @@ pivot_root . oldroot
 # 就会保持 /oldroot/dev/console 打开，导致 /oldroot 
 # umount 不下来。
 ###
-exec chroot . bin/bash >dev/console 2>&1 << HERE
+exec chroot . bin/bash -s "$@" >dev/console 2>&1 << 'HERE'
 cd /
 umount -R oldroot
 rmdir oldroot
